@@ -151,7 +151,9 @@ function Zksync() {
                                                           l1Tol2Times,
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
-                                                          l2Tol1Amount
+                                                          l2Tol1Amount,
+                                                          syncswapTimes,
+                                                          syncswapAmount
                                                       }) => {
                     updatedData[index] = {
                         ...updatedData[index],
@@ -164,6 +166,8 @@ function Zksync() {
                         l1Tol2Amount,
                         l2Tol1Times,
                         l2Tol1Amount,
+                        syncswapTimes,
+                        syncswapAmount
                     };
                     setData(updatedData);
                     localStorage.setItem('addresses', JSON.stringify(data));
@@ -188,6 +192,8 @@ function Zksync() {
                     l1Tol2Amount: null,
                     l2Tol1Times: null,
                     l2Tol1Amount: null,
+                    syncswapTimes: null,
+                    syncswapAmount: null,
                     contractActivity: null,
                     totalFee: null,
                 };
@@ -233,7 +239,9 @@ function Zksync() {
                                                           l1Tol2Times,
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
-                                                          l2Tol1Amount
+                                                          l2Tol1Amount,
+                                                          syncswapTimes,
+                                                          syncswapAmount
                                                       }) => {
                     newEntry.totalFee = totalFee;
                     newEntry.contractActivity = contractActivity;
@@ -244,6 +252,8 @@ function Zksync() {
                     newEntry.l1Tol2Amount = l1Tol2Amount;
                     newEntry.l2Tol1Times = l2Tol1Times;
                     newEntry.l2Tol1Amount = l2Tol1Amount;
+                    newEntry.syncswapTimes = syncswapTimes;
+                    newEntry.syncswapAmount = syncswapAmount;
                     setData([...newData]);
                     localStorage.setItem('addresses', JSON.stringify(newData));
                 })
@@ -302,6 +312,8 @@ function Zksync() {
                     item.l1Tol2Amount = null;
                     item.l2Tol1Times = null;
                     item.l2Tol1Amount = null;
+                    item.syncswapTimes = null;
+                    item.syncswapAmount = null;
                     item.contractActivity = null;
                     item.totalFee = null;
                     setData([...newData]);
@@ -342,7 +354,9 @@ function Zksync() {
                                                                                      l1Tol2Times,
                                                                                      l1Tol2Amount,
                                                                                      l2Tol1Times,
-                                                                                     l2Tol1Amount
+                                                                                     l2Tol1Amount,
+                                                                                     syncswapTimes,
+                                                                                     syncswapAmount
                                                                                  }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -353,6 +367,8 @@ function Zksync() {
                         item.l1Tol2Amount = l1Tol2Amount;
                         item.l2Tol1Times = l2Tol1Times;
                         item.l2Tol1Amount = l2Tol1Amount;
+                        item.syncswapTimes = syncswapTimes;
+                        item.syncswapAmount = syncswapAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(data));
                     }))
@@ -450,7 +466,9 @@ function Zksync() {
                                                                                 l1Tol2Times,
                                                                                 l1Tol2Amount,
                                                                                 l2Tol1Times,
-                                                                                l2Tol1Amount
+                                                                                l2Tol1Amount,
+                                                                                syncswapTimes,
+                                                                                syncswapAmount
                                                                             }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -461,6 +479,8 @@ function Zksync() {
                         item.l1Tol2Amount = l1Tol2Amount;
                         item.l2Tol1Times = l2Tol1Times;
                         item.l2Tol1Amount = l2Tol1Amount;
+                        item.syncswapTimes = syncswapTimes;
+                        item.syncswapAmount = syncswapAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -486,6 +506,8 @@ function Zksync() {
                         l1Tol2Amount: null,
                         l2Tol1Times: null,
                         l2Tol1Amount: null,
+                        syncswapTimes: null,
+                        syncswapAmount: null,
                         contractActivity: null,
                         totalFee: null,
                     };
@@ -534,7 +556,9 @@ function Zksync() {
                                                                                 l1Tol2Times,
                                                                                 l1Tol2Amount,
                                                                                 l2Tol1Times,
-                                                                                l2Tol1Amount
+                                                                                l2Tol1Amount,
+                                                                                syncswapTimes,
+                                                                                syncswapAmount
                                                                             }) => {
                         newEntry.totalFee = totalFee;
                         newEntry.contractActivity = contractActivity;
@@ -545,6 +569,8 @@ function Zksync() {
                         newEntry.l1Tol2Amount = l1Tol2Amount;
                         newEntry.l2Tol1Times = l2Tol1Times;
                         newEntry.l2Tol1Amount = l2Tol1Amount;
+                        newEntry.syncswapTimes = syncswapTimes;
+                        newEntry.syncswapAmount = syncswapAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -795,6 +821,28 @@ function Zksync() {
                     ],
                 },
                 {
+                    title: "Syncswap合约",
+                    key: "contract_syncswap_group",
+                    children: [
+                        {
+                            title: "交互次数",
+                            dataIndex: "syncswapTimes",
+                            key: "syncswapTimes",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                        {
+                            title: "交互金额",
+                            dataIndex: "syncswapAmount",
+                            key: "syncswapAmount",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                    ],
+                },
+                {
                     title: "活跃统计",
                     key: "activity_stats_group",
                     children: [
@@ -978,23 +1026,28 @@ function Zksync() {
                             let zks1Balance = 0;
                             let zks2Balance = 0;
                             let zks2UsdcBalance = 0;
+                            let totalSyncswapAmount = 0;
                             let totalFees = 0;
                             pageData.forEach(({
                                                   eth_balance,
                                                   zks1_balance,
                                                   zks2_balance,
                                                   zks2_usdcBalance,
+                                                  syncswapAmount,
                                                   totalFee
                                               }) => {
                                 ethBalance += Number(eth_balance);
                                 zks1Balance += Number(zks1_balance);
                                 zks2Balance += Number(zks2_balance);
                                 zks2UsdcBalance += Number(zks2_usdcBalance);
+                                totalSyncswapAmount += Number(syncswapAmount);
                                 totalFees += Number(totalFee);
                             })
 
-                            const emptyCells = Array(10).fill().map((_, index) => <Table.Summary.Cell
-                                index={index + 6}/>);
+                            const emptyCells = Array(7).fill().map((_, index) => <Table.Summary.Cell
+                                index={index + 7}/>);
+                            const emptyCells_2 = Array(3).fill().map((_, index) => <Table.Summary.Cell
+                                index={index + 3}/>);
 
                             return (
                                 <>
@@ -1007,7 +1060,9 @@ function Zksync() {
                                         <Table.Summary.Cell index={8}>{zks2Balance.toFixed(3)}</Table.Summary.Cell>
                                         <Table.Summary.Cell index={9}>{zks2UsdcBalance.toFixed(2)}</Table.Summary.Cell>
                                         {emptyCells}
-                                        <Table.Summary.Cell index={20}>{totalFees.toFixed(3)}</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={17}>{totalSyncswapAmount.toFixed(3)}</Table.Summary.Cell>
+                                        {emptyCells_2}
+                                        <Table.Summary.Cell index={22}>{totalFees.toFixed(3)}</Table.Summary.Cell>
                                     </Table.Summary.Row>
                                 </>
                             )

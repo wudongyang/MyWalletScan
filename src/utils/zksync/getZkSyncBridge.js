@@ -1,6 +1,12 @@
 import axios from "axios";
 import {ethers} from "ethers";
 
+const CONTRACR_SYNCSWAP = "0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295".toLowerCase();
+const CONTRACR_IZUMI = "0x9606eC131EeC0F84c95D82c9a63959F2331cF2aC".toLowerCase();
+const CONTRACR_RUBIC = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce".toLowerCase();
+
+
+
 function getDayNumber(d) {
     return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
 }
@@ -29,7 +35,9 @@ async function processTransactions(
     l1Tol2Times,
     l1Tol2Amount,
     l2Tol1Times,
-    l2Tol1Amount
+    l2Tol1Amount,
+    syncswapTimes,
+    syncswapAmount
 ) {
     for (let i = 0; i < list.length; i++) {
         if (list[i]['balanceChanges'][0]['from'].toLowerCase() === address.toLowerCase()) {
@@ -54,9 +62,41 @@ async function processTransactions(
             const value = ethers.formatEther(list[i].data.value, "ether");
             l2Tol1Amount += parseFloat(value);
         }
+
+        if (
+            list[i].data.contractAddress.toLowerCase() == CONTRACR_SYNCSWAP
+        ) {
+            syncswapTimes++;
+            // const value = ethers.formatEther(list[i].data.value, "ether");
+            // syncswapAmount += parseFloat(value);
+
+            const erc20TransfersList = list[i].erc20Transfers;
+            console.log("erc20TransfersList:", erc20TransfersList);
+            for (let j = 0; j < erc20TransfersList.length; j++) {
+                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("xxx ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    syncswapAmount += parseFloat(value);
+                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("xxx ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    syncswapAmount += parseFloat(value);
+                }
+            }
+        }
+
+
+
+        
     }
     return [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times,
-            l2Tol1Amount];
+            l2Tol1Amount, syncswapTimes, syncswapAmount];
 }
 
 async function getZkSyncBridge(address) {
@@ -77,10 +117,12 @@ async function getZkSyncBridge(address) {
         let offset = 0;
         let fromBlockNumber = null;
         let fromTxIndex = null;
+        let syncswapTimes = 0;
+        let syncswapAmount = 0;
         const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
         const initResponse = await axios.get(initUrl)
         const initDataLength = initResponse.data.total;
-        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount] =
+        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount] =
             await processTransactions(
                 address,
                 totalFee,
@@ -92,7 +134,9 @@ async function getZkSyncBridge(address) {
                 l1Tol2Times,
                 l1Tol2Amount,
                 l2Tol1Times,
-                l2Tol1Amount
+                l2Tol1Amount,
+                syncswapTimes,
+                syncswapAmount
             );
         if (initDataLength > 100) {
             fromBlockNumber = initResponse.data.list[0].blockNumber;
@@ -105,7 +149,7 @@ async function getZkSyncBridge(address) {
                 const response = await axios.get(url);
                 const ListLength = response.data.list.length;
                 [
-                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount] =
+                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount] =
                     await processTransactions(
                         address,
                         totalFee,
@@ -117,7 +161,9 @@ async function getZkSyncBridge(address) {
                         l1Tol2Times,
                         l1Tol2Amount,
                         l2Tol1Times,
-                        l2Tol1Amount
+                        l2Tol1Amount,
+                        syncswapTimes,
+                        syncswapAmount
                     );
                 if (ListLength === 100) {
                     offset += ListLength;
@@ -139,7 +185,9 @@ async function getZkSyncBridge(address) {
             l1Tol2Times,
             l1Tol2Amount: l1Tol2Amount.toFixed(3),
             l2Tol1Times,
-            l2Tol1Amount: l2Tol1Amount.toFixed(3)
+            l2Tol1Amount: l2Tol1Amount.toFixed(3),
+            syncswapTimes,
+            syncswapAmount: syncswapAmount.toFixed(3),
         }
     } catch (e) {
         console.log(e);
@@ -147,7 +195,8 @@ async function getZkSyncBridge(address) {
             totalFee: "Error",
             contractActivity: "Error",
             dayActivity: "Error", weekActivity: "Error", monthActivity: "Error",
-            l1Tol2Times: "Error", l1Tol2Amount: "Error", l2Tol1Times: "Error", l2Tol1Amount: "Error"
+            l1Tol2Times: "Error", l1Tol2Amount: "Error", l2Tol1Times: "Error", l2Tol1Amount: "Error",
+            syncswapTimes: "Error", syncswapAmount: "Error"
         }
     }
 }
