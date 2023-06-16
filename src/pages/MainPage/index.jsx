@@ -52,7 +52,6 @@ function MainPage() {
                         {location.pathname === "/stark" && <Stark/>}
                         {location.pathname === "/layer" && <Layer/>}
                         {location.pathname === "/mirror" && <Mirror/>}
-                        {location.pathname === "/coffee" && <Coffee/>}
                         {location.pathname === "/deposit" && <Deposit/>}
                     </div>
                 </div>
