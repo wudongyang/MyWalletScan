@@ -20,7 +20,7 @@ function getWeekNumber(d) {
 }
 
 function getMonthNumber(d) {
-    console.log(d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1))
+    // console.log("getMonthNumber", d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1))
     return d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1);
 }
 
@@ -37,7 +37,11 @@ async function processTransactions(
     l2Tol1Times,
     l2Tol1Amount,
     syncswapTimes,
-    syncswapAmount
+    syncswapAmount,
+    izumiTimes,
+    izumiAmount,
+    rubicTimes,
+    rubicAmount
 ) {
     for (let i = 0; i < list.length; i++) {
         if (list[i]['balanceChanges'][0]['from'].toLowerCase() === address.toLowerCase()) {
@@ -67,36 +71,78 @@ async function processTransactions(
             list[i].data.contractAddress.toLowerCase() == CONTRACR_SYNCSWAP
         ) {
             syncswapTimes++;
-            // const value = ethers.formatEther(list[i].data.value, "ether");
-            // syncswapAmount += parseFloat(value);
 
             const erc20TransfersList = list[i].erc20Transfers;
-            console.log("erc20TransfersList:", erc20TransfersList);
+            // console.log("syncswap erc20TransfersList:", erc20TransfersList);
             for (let j = 0; j < erc20TransfersList.length; j++) {
                 if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
                     && erc20TransfersList[j].tokenInfo.symbol == "ETH"
                     && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
                     
-                    console.log("xxx ", erc20TransfersList[j].amount);
+                    // console.log("syncswap amount ", erc20TransfersList[j].amount);
                     const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
                     syncswapAmount += parseFloat(value);
                 }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
                     && erc20TransfersList[j].tokenInfo.symbol == "ETH"
                     && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
                     
-                    console.log("xxx ", erc20TransfersList[j].amount);
+                    // console.log("syncswap amount ", erc20TransfersList[j].amount);
                     const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
                     syncswapAmount += parseFloat(value);
                 }
             }
-        }
+        }else if (
+            list[i].data.contractAddress.toLowerCase() == CONTRACR_IZUMI
+        ) {
+            izumiTimes++;
 
+            const erc20TransfersList = list[i].erc20Transfers;
+            console.log("izumi erc20TransfersList:", erc20TransfersList);
+            for (let j = 0; j < erc20TransfersList.length; j++) {
+                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("izumi amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    izumiAmount += parseFloat(value);
+                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("izumi amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    izumiAmount += parseFloat(value);
+                }
+            }
+        }else if (
+            list[i].data.contractAddress.toLowerCase() == CONTRACR_RUBIC
+        ) {
+            rubicTimes++;
 
-
-        
+            const erc20TransfersList = list[i].erc20Transfers;
+            console.log("rubic erc20TransfersList:", erc20TransfersList);
+            for (let j = 0; j < erc20TransfersList.length; j++) {
+                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("rubic amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    rubicAmount += parseFloat(value);
+                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("rubic amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    rubicAmount += parseFloat(value);
+                }
+            }
+        }   
     }
     return [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times,
-            l2Tol1Amount, syncswapTimes, syncswapAmount];
+            l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount];
 }
 
 async function getZkSyncBridge(address) {
@@ -119,10 +165,14 @@ async function getZkSyncBridge(address) {
         let fromTxIndex = null;
         let syncswapTimes = 0;
         let syncswapAmount = 0;
+        let izumiTimes = 0;
+        let izumiAmount = 0;
+        let rubicTimes = 0;
+        let rubicAmount = 0;
         const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
         const initResponse = await axios.get(initUrl)
         const initDataLength = initResponse.data.total;
-        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount] =
+        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount] =
             await processTransactions(
                 address,
                 totalFee,
@@ -136,8 +186,15 @@ async function getZkSyncBridge(address) {
                 l2Tol1Times,
                 l2Tol1Amount,
                 syncswapTimes,
-                syncswapAmount
+                syncswapAmount,
+                izumiTimes,
+                izumiAmount,
+                rubicTimes,
+                rubicAmount
             );
+        
+        console.log("rubicTimes:", rubicTimes);
+        console.log("rubicAmount:", rubicAmount);
         if (initDataLength > 100) {
             fromBlockNumber = initResponse.data.list[0].blockNumber;
             fromTxIndex = initResponse.data.list[0].indexInBlock;
@@ -149,7 +206,7 @@ async function getZkSyncBridge(address) {
                 const response = await axios.get(url);
                 const ListLength = response.data.list.length;
                 [
-                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount] =
+                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount] =
                     await processTransactions(
                         address,
                         totalFee,
@@ -163,7 +220,11 @@ async function getZkSyncBridge(address) {
                         l2Tol1Times,
                         l2Tol1Amount,
                         syncswapTimes,
-                        syncswapAmount
+                        syncswapAmount,
+                        izumiTimes,
+                        izumiAmount,
+                        rubicTimes,
+                        rubicAmount
                     );
                 if (ListLength === 100) {
                     offset += ListLength;
@@ -188,6 +249,10 @@ async function getZkSyncBridge(address) {
             l2Tol1Amount: l2Tol1Amount.toFixed(3),
             syncswapTimes,
             syncswapAmount: syncswapAmount.toFixed(3),
+            izumiTimes,
+            izumiAmount: izumiAmount.toFixed(3),
+            rubicTimes,
+            rubicAmount: rubicAmount.toFixed(3),
         }
     } catch (e) {
         console.log(e);
@@ -196,7 +261,9 @@ async function getZkSyncBridge(address) {
             contractActivity: "Error",
             dayActivity: "Error", weekActivity: "Error", monthActivity: "Error",
             l1Tol2Times: "Error", l1Tol2Amount: "Error", l2Tol1Times: "Error", l2Tol1Amount: "Error",
-            syncswapTimes: "Error", syncswapAmount: "Error"
+            syncswapTimes: "Error", syncswapAmount: "Error",
+            izumiTimes: "Error", izumiAmount: "Error",
+            rubicTimes: "Error", rubicAmount: "Error"
         }
     }
 }
