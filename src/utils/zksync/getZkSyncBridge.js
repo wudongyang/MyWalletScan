@@ -4,6 +4,8 @@ import {ethers} from "ethers";
 const CONTRACR_SYNCSWAP = "0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295".toLowerCase();
 const CONTRACR_IZUMI = "0x9606eC131EeC0F84c95D82c9a63959F2331cF2aC".toLowerCase();
 const CONTRACR_RUBIC = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce".toLowerCase();
+const CONTRACR_MUTE = "0x8B791913eB07C32779a16750e3868aA8495F5964".toLowerCase();
+
 
 
 
@@ -41,7 +43,9 @@ async function processTransactions(
     izumiTimes,
     izumiAmount,
     rubicTimes,
-    rubicAmount
+    rubicAmount,
+    muteTimes,
+    muteAmount
 ) {
     for (let i = 0; i < list.length; i++) {
         if (list[i]['balanceChanges'][0]['from'].toLowerCase() === address.toLowerCase()) {
@@ -139,10 +143,34 @@ async function processTransactions(
                     rubicAmount += parseFloat(value);
                 }
             }
+        }else if (
+            list[i].data.contractAddress.toLowerCase() == CONTRACR_MUTE
+        ) {
+            muteTimes++;
+
+            const erc20TransfersList = list[i].erc20Transfers;
+            console.log("mute erc20TransfersList:", erc20TransfersList);
+            for (let j = 0; j < erc20TransfersList.length; j++) {
+                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("mute amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    muteAmount += parseFloat(value);
+                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
+                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                    
+                    console.log("mute amount ", erc20TransfersList[j].amount);
+                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                    muteAmount += parseFloat(value);
+                }
+            }
         }   
     }
     return [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times,
-            l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount];
+            l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount];
 }
 
 async function getZkSyncBridge(address) {
@@ -169,10 +197,12 @@ async function getZkSyncBridge(address) {
         let izumiAmount = 0;
         let rubicTimes = 0;
         let rubicAmount = 0;
+        let muteTimes = 0;
+        let muteAmount = 0;
         const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
         const initResponse = await axios.get(initUrl)
         const initDataLength = initResponse.data.total;
-        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount] =
+        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount] =
             await processTransactions(
                 address,
                 totalFee,
@@ -190,11 +220,13 @@ async function getZkSyncBridge(address) {
                 izumiTimes,
                 izumiAmount,
                 rubicTimes,
-                rubicAmount
+                rubicAmount,
+                muteTimes,
+                muteAmount
             );
         
-        console.log("rubicTimes:", rubicTimes);
-        console.log("rubicAmount:", rubicAmount);
+        console.log("muteTimes:", muteTimes);
+        console.log("muteAmount:", muteAmount);
         if (initDataLength > 100) {
             fromBlockNumber = initResponse.data.list[0].blockNumber;
             fromTxIndex = initResponse.data.list[0].indexInBlock;
@@ -206,7 +238,7 @@ async function getZkSyncBridge(address) {
                 const response = await axios.get(url);
                 const ListLength = response.data.list.length;
                 [
-                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount] =
+                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount] =
                     await processTransactions(
                         address,
                         totalFee,
@@ -224,7 +256,9 @@ async function getZkSyncBridge(address) {
                         izumiTimes,
                         izumiAmount,
                         rubicTimes,
-                        rubicAmount
+                        rubicAmount,
+                        muteTimes,
+                        muteAmount
                     );
                 if (ListLength === 100) {
                     offset += ListLength;
@@ -253,6 +287,8 @@ async function getZkSyncBridge(address) {
             izumiAmount: izumiAmount.toFixed(3),
             rubicTimes,
             rubicAmount: rubicAmount.toFixed(3),
+            muteTimes,
+            muteAmount: muteAmount.toFixed(3),
         }
     } catch (e) {
         console.log(e);
@@ -263,7 +299,8 @@ async function getZkSyncBridge(address) {
             l1Tol2Times: "Error", l1Tol2Amount: "Error", l2Tol1Times: "Error", l2Tol1Amount: "Error",
             syncswapTimes: "Error", syncswapAmount: "Error",
             izumiTimes: "Error", izumiAmount: "Error",
-            rubicTimes: "Error", rubicAmount: "Error"
+            rubicTimes: "Error", rubicAmount: "Error",
+            muteAmount: "Error", muteAmount: "Error"
         }
     }
 }

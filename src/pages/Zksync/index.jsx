@@ -175,7 +175,9 @@ function Zksync() {
                         izumiTimes,
                         izumiAmount,
                         rubicTimes,
-                        rubicAmount
+                        rubicAmount,
+                        muteTimes,
+                        muteAmount
                     };
                     setData(updatedData);
                     localStorage.setItem('addresses', JSON.stringify(data));
@@ -206,6 +208,8 @@ function Zksync() {
                     izumiAmount: null,
                     rubicTimes: null,
                     rubicAmount: null,
+                    muteTimes: null,
+                    muteAmount: null,
                     contractActivity: null,
                     totalFee: null,
                 };
@@ -257,7 +261,9 @@ function Zksync() {
                                                           izumiTimes,
                                                           izumiAmount,
                                                           rubicTimes,
-                                                          rubicAmount
+                                                          rubicAmount,
+                                                          muteTimes,
+                                                          muteAmount
                                                       }) => {
                     newEntry.totalFee = totalFee;
                     newEntry.contractActivity = contractActivity;
@@ -274,6 +280,8 @@ function Zksync() {
                     newEntry.izumiAmount = izumiAmount;
                     newEntry.rubicTimes = rubicTimes;
                     newEntry.rubicAmount = rubicAmount;
+                    newEntry.muteTimes = muteTimes;
+                    newEntry.muteAmount = muteAmount;
                     setData([...newData]);
                     localStorage.setItem('addresses', JSON.stringify(newData));
                 })
@@ -338,6 +346,8 @@ function Zksync() {
                     item.izumiAmount = null;
                     item.rubicTimes = null;
                     item.rubicAmount = null;
+                    item.muteTimes = null;
+                    item.muteAmount = null;
                     item.contractActivity = null;
                     item.totalFee = null;
                     setData([...newData]);
@@ -384,7 +394,9 @@ function Zksync() {
                                                                                      izumiTimes,
                                                                                      izumiAmount,
                                                                                      rubicTimes,
-                                                                                     rubicAmount
+                                                                                     rubicAmount,
+                                                                                     muteTimes,
+                                                                                     muteAmount
                                                                                  }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -401,6 +413,8 @@ function Zksync() {
                         item.izumiAmount = izumiAmount;
                         item.rubicTimes = rubicTimes;
                         item.rubicAmount = rubicAmount;
+                        item.muteTimes = muteTimes;
+                        item.muteAmount = muteAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(data));
                     }))
@@ -504,7 +518,9 @@ function Zksync() {
                                                                                 izumiTimes,
                                                                                 izumiAmount,
                                                                                 rubicTimes,
-                                                                                rubicAmount
+                                                                                rubicAmount,
+                                                                                muteTimes,
+                                                                                muteAmount
                                                                             }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -521,6 +537,8 @@ function Zksync() {
                         item.izumiAmount = izumiAmount;
                         item.rubicTimes = rubicTimes;
                         item.rubicAmount = rubicAmount;
+                        item.muteTimes = muteTimes;
+                        item.muteAmount = muteAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -552,6 +570,8 @@ function Zksync() {
                         izumiAmount: null,
                         rubicTimes: null,
                         rubicAmount: null,
+                        muteTimes: null,
+                        muteAmount: null,
                         contractActivity: null,
                         totalFee: null,
                     };
@@ -606,7 +626,9 @@ function Zksync() {
                                                                                 izumiTimes,
                                                                                 izumiAmount,
                                                                                 rubicTimes,
-                                                                                rubicAmount
+                                                                                rubicAmount,
+                                                                                muteTimes,
+                                                                                muteAmount
                                                                             }) => {
                         newEntry.totalFee = totalFee;
                         newEntry.contractActivity = contractActivity;
@@ -623,6 +645,8 @@ function Zksync() {
                         newEntry.izumiAmount = izumiAmount;
                         newEntry.rubicTimes = rubicTimes;
                         newEntry.rubicAmount = rubicAmount;
+                        newEntry.muteTimes = muteTimes;
+                        newEntry.muteAmount = muteAmount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -939,6 +963,28 @@ function Zksync() {
                     ],
                 },
                 {
+                    title: "Mute合约",
+                    key: "contract_mute_group",
+                    children: [
+                        {
+                            title: "交互次数",
+                            dataIndex: "muteTimes",
+                            key: "muteTimes",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                        {
+                            title: "交互金额",
+                            dataIndex: "muteAmount",
+                            key: "muteAmount",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                    ],
+                },
+                {
                     title: "活跃统计",
                     key: "activity_stats_group",
                     children: [
@@ -1125,6 +1171,7 @@ function Zksync() {
                             let totalSyncswapAmount = 0;
                             let totalIzumiAmount = 0;
                             let totalRubicAmount = 0;
+                            let totalMuteAmount = 0;
                             let totalFees = 0;
                             pageData.forEach(({
                                                   eth_balance,
@@ -1134,6 +1181,7 @@ function Zksync() {
                                                   syncswapAmount,
                                                   izumiAmount,
                                                   rubicAmount,
+                                                  muteAmount,
                                                   totalFee
                                               }) => {
                                 ethBalance += Number(eth_balance);
@@ -1143,6 +1191,7 @@ function Zksync() {
                                 totalSyncswapAmount += Number(syncswapAmount);
                                 totalIzumiAmount += Number(izumiAmount);
                                 totalRubicAmount += Number(rubicAmount);
+                                totalMuteAmount += Number(muteAmount);
                                 totalFees += Number(totalFee);
                             })
 
@@ -1170,6 +1219,8 @@ function Zksync() {
                                         <Table.Summary.Cell index={18}>{totalIzumiAmount.toFixed(3)}</Table.Summary.Cell>
                                         {emptyCells_1}
                                         <Table.Summary.Cell index={19}>{totalRubicAmount.toFixed(3)}</Table.Summary.Cell>
+                                        {emptyCells_1}
+                                        <Table.Summary.Cell index={19}>{totalMuteAmount.toFixed(3)}</Table.Summary.Cell>
                                         {emptyCells_4}
                                         <Table.Summary.Cell index={22}>{totalFees.toFixed(3)}</Table.Summary.Cell>
                                     </Table.Summary.Row>

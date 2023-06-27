@@ -19,6 +19,11 @@ npm i
 npm run dev
 ```
 
+2. 编译
+```
+ npm run build
+```
+
 ### 说明
 
 ```
