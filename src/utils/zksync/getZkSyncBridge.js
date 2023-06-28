@@ -6,9 +6,6 @@ const CONTRACR_IZUMI = "0x9606eC131EeC0F84c95D82c9a63959F2331cF2aC".toLowerCase(
 const CONTRACR_RUBIC = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce".toLowerCase();
 const CONTRACR_MUTE = "0x8B791913eB07C32779a16750e3868aA8495F5964".toLowerCase();
 
-
-
-
 function getDayNumber(d) {
     return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
 }
@@ -38,14 +35,7 @@ async function processTransactions(
     l1Tol2Amount,
     l2Tol1Times,
     l2Tol1Amount,
-    syncswapTimes,
-    syncswapAmount,
-    izumiTimes,
-    izumiAmount,
-    rubicTimes,
-    rubicAmount,
-    muteTimes,
-    muteAmount
+    contractsMap
 ) {
     for (let i = 0; i < list.length; i++) {
         if (list[i]['balanceChanges'][0]['from'].toLowerCase() === address.toLowerCase()) {
@@ -71,106 +61,34 @@ async function processTransactions(
             l2Tol1Amount += parseFloat(value);
         }
 
-        if (
-            list[i].data.contractAddress.toLowerCase() == CONTRACR_SYNCSWAP
-        ) {
-            syncswapTimes++;
-
-            const erc20TransfersList = list[i].erc20Transfers;
-            // console.log("syncswap erc20TransfersList:", erc20TransfersList);
-            for (let j = 0; j < erc20TransfersList.length; j++) {
-                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    // console.log("syncswap amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    syncswapAmount += parseFloat(value);
-                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    // console.log("syncswap amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    syncswapAmount += parseFloat(value);
+        // 遍历 contractsMap
+        for (let [key, contract] of contractsMap) {
+            if (list[i].data.contractAddress.toLowerCase() === contract.address.toLowerCase()) {
+                contract.times++;
+                const erc20TransfersList = list[i].erc20Transfers;
+                // console.log("syncswap erc20TransfersList:", erc20TransfersList);
+                for (let j = 0; j < erc20TransfersList.length; j++) {
+                    if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
+                        && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                        && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                        
+                        // console.log("syncswap amount ", erc20TransfersList[j].amount);
+                        const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                        contract.amount += parseFloat(value);
+                    }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
+                        && erc20TransfersList[j].tokenInfo.symbol == "ETH"
+                        && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
+                        
+                        // console.log("syncswap amount ", erc20TransfersList[j].amount);
+                        const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
+                        contract.amount += parseFloat(value);
+                    }
                 }
             }
-        }else if (
-            list[i].data.contractAddress.toLowerCase() == CONTRACR_IZUMI
-        ) {
-            izumiTimes++;
-
-            const erc20TransfersList = list[i].erc20Transfers;
-            console.log("izumi erc20TransfersList:", erc20TransfersList);
-            for (let j = 0; j < erc20TransfersList.length; j++) {
-                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("izumi amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    izumiAmount += parseFloat(value);
-                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("izumi amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    izumiAmount += parseFloat(value);
-                }
-            }
-        }else if (
-            list[i].data.contractAddress.toLowerCase() == CONTRACR_RUBIC
-        ) {
-            rubicTimes++;
-
-            const erc20TransfersList = list[i].erc20Transfers;
-            console.log("rubic erc20TransfersList:", erc20TransfersList);
-            for (let j = 0; j < erc20TransfersList.length; j++) {
-                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("rubic amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    rubicAmount += parseFloat(value);
-                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("rubic amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    rubicAmount += parseFloat(value);
-                }
-            }
-        }else if (
-            list[i].data.contractAddress.toLowerCase() == CONTRACR_MUTE
-        ) {
-            muteTimes++;
-
-            const erc20TransfersList = list[i].erc20Transfers;
-            console.log("mute erc20TransfersList:", erc20TransfersList);
-            for (let j = 0; j < erc20TransfersList.length; j++) {
-                if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("mute amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    muteAmount += parseFloat(value);
-                }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
-                    && erc20TransfersList[j].tokenInfo.symbol == "ETH"
-                    && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
-                    
-                    console.log("mute amount ", erc20TransfersList[j].amount);
-                    const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
-                    muteAmount += parseFloat(value);
-                }
-            }
-        }   
+        }
     }
     return [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times,
-            l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount];
+            l2Tol1Amount, contractsMap];
 }
 
 async function getZkSyncBridge(address) {
@@ -191,18 +109,34 @@ async function getZkSyncBridge(address) {
         let offset = 0;
         let fromBlockNumber = null;
         let fromTxIndex = null;
-        let syncswapTimes = 0;
-        let syncswapAmount = 0;
-        let izumiTimes = 0;
-        let izumiAmount = 0;
-        let rubicTimes = 0;
-        let rubicAmount = 0;
-        let muteTimes = 0;
-        let muteAmount = 0;
+        
+        let contractsMap = new Map();
+
+        contractsMap.set("syncswap", {
+            address: CONTRACR_SYNCSWAP,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("izumi", {
+            address: CONTRACR_IZUMI,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("rubic", {
+            address: CONTRACR_RUBIC,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("mute", {
+            address: CONTRACR_MUTE,
+            times: 0,
+            amount: 0
+        });
+
         const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
         const initResponse = await axios.get(initUrl)
         const initDataLength = initResponse.data.total;
-        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount] =
+        [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, contractsMap] =
             await processTransactions(
                 address,
                 totalFee,
@@ -215,18 +149,10 @@ async function getZkSyncBridge(address) {
                 l1Tol2Amount,
                 l2Tol1Times,
                 l2Tol1Amount,
-                syncswapTimes,
-                syncswapAmount,
-                izumiTimes,
-                izumiAmount,
-                rubicTimes,
-                rubicAmount,
-                muteTimes,
-                muteAmount
+                contractsMap
             );
         
-        console.log("muteTimes:", muteTimes);
-        console.log("muteAmount:", muteAmount);
+        console.log("mapContracts:", contractsMap);
         if (initDataLength > 100) {
             fromBlockNumber = initResponse.data.list[0].blockNumber;
             fromTxIndex = initResponse.data.list[0].indexInBlock;
@@ -238,7 +164,7 @@ async function getZkSyncBridge(address) {
                 const response = await axios.get(url);
                 const ListLength = response.data.list.length;
                 [
-                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, syncswapTimes, syncswapAmount, izumiTimes, izumiAmount, rubicTimes, rubicAmount, muteTimes, muteAmount] =
+                    totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, contractsMap] =
                     await processTransactions(
                         address,
                         totalFee,
@@ -251,14 +177,7 @@ async function getZkSyncBridge(address) {
                         l1Tol2Amount,
                         l2Tol1Times,
                         l2Tol1Amount,
-                        syncswapTimes,
-                        syncswapAmount,
-                        izumiTimes,
-                        izumiAmount,
-                        rubicTimes,
-                        rubicAmount,
-                        muteTimes,
-                        muteAmount
+                        contractsMap
                     );
                 if (ListLength === 100) {
                     offset += ListLength;
@@ -271,6 +190,11 @@ async function getZkSyncBridge(address) {
         weekActivity = weeks.size;
         monthActivity = months.size;
         contractActivity = contract.size;
+
+        for (let [key, contract] of contractsMap) {
+            contract.amount = contract.amount.toFixed(3);
+        }
+
         return {
             totalFee: totalFee.toFixed(4),
             contractActivity,
@@ -281,26 +205,20 @@ async function getZkSyncBridge(address) {
             l1Tol2Amount: l1Tol2Amount.toFixed(3),
             l2Tol1Times,
             l2Tol1Amount: l2Tol1Amount.toFixed(3),
-            syncswapTimes,
-            syncswapAmount: syncswapAmount.toFixed(3),
-            izumiTimes,
-            izumiAmount: izumiAmount.toFixed(3),
-            rubicTimes,
-            rubicAmount: rubicAmount.toFixed(3),
-            muteTimes,
-            muteAmount: muteAmount.toFixed(3),
+            contractsMap
         }
     } catch (e) {
         console.log(e);
+
+        for (let [key, contract] of contractsMap) {
+            contract.amount = "Error";
+        }
         return {
             totalFee: "Error",
             contractActivity: "Error",
             dayActivity: "Error", weekActivity: "Error", monthActivity: "Error",
             l1Tol2Times: "Error", l1Tol2Amount: "Error", l2Tol1Times: "Error", l2Tol1Amount: "Error",
-            syncswapTimes: "Error", syncswapAmount: "Error",
-            izumiTimes: "Error", izumiAmount: "Error",
-            rubicTimes: "Error", rubicAmount: "Error",
-            muteAmount: "Error", muteAmount: "Error"
+            contractsMap
         }
     }
 }

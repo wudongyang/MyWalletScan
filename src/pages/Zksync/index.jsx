@@ -152,12 +152,7 @@ function Zksync() {
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
                                                           l2Tol1Amount,
-                                                          syncswapTimes,
-                                                          syncswapAmount,
-                                                          izumiTimes,
-                                                          izumiAmount,
-                                                          rubicTimes,
-                                                          rubicAmount
+                                                          contractList
                                                       }) => {
                     updatedData[index] = {
                         ...updatedData[index],
@@ -170,14 +165,7 @@ function Zksync() {
                         l1Tol2Amount,
                         l2Tol1Times,
                         l2Tol1Amount,
-                        syncswapTimes,
-                        syncswapAmount,
-                        izumiTimes,
-                        izumiAmount,
-                        rubicTimes,
-                        rubicAmount,
-                        muteTimes,
-                        muteAmount
+                        contractList
                     };
                     setData(updatedData);
                     localStorage.setItem('addresses', JSON.stringify(data));
@@ -202,14 +190,7 @@ function Zksync() {
                     l1Tol2Amount: null,
                     l2Tol1Times: null,
                     l2Tol1Amount: null,
-                    syncswapTimes: null,
-                    syncswapAmount: null,
-                    izumiTimes: null,
-                    izumiAmount: null,
-                    rubicTimes: null,
-                    rubicAmount: null,
-                    muteTimes: null,
-                    muteAmount: null,
+                    contractList,
                     contractActivity: null,
                     totalFee: null,
                 };
@@ -256,14 +237,7 @@ function Zksync() {
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
                                                           l2Tol1Amount,
-                                                          syncswapTimes,
-                                                          syncswapAmount,
-                                                          izumiTimes,
-                                                          izumiAmount,
-                                                          rubicTimes,
-                                                          rubicAmount,
-                                                          muteTimes,
-                                                          muteAmount
+                                                          contractList
                                                       }) => {
                     newEntry.totalFee = totalFee;
                     newEntry.contractActivity = contractActivity;
@@ -274,14 +248,7 @@ function Zksync() {
                     newEntry.l1Tol2Amount = l1Tol2Amount;
                     newEntry.l2Tol1Times = l2Tol1Times;
                     newEntry.l2Tol1Amount = l2Tol1Amount;
-                    newEntry.syncswapTimes = syncswapTimes;
-                    newEntry.syncswapAmount = syncswapAmount;
-                    newEntry.izumiTimes = izumiTimes;
-                    newEntry.izumiAmount = izumiAmount;
-                    newEntry.rubicTimes = rubicTimes;
-                    newEntry.rubicAmount = rubicAmount;
-                    newEntry.muteTimes = muteTimes;
-                    newEntry.muteAmount = muteAmount;
+                    newEntry.contractList = contractList;
                     setData([...newData]);
                     localStorage.setItem('addresses', JSON.stringify(newData));
                 })
@@ -389,14 +356,7 @@ function Zksync() {
                                                                                      l1Tol2Amount,
                                                                                      l2Tol1Times,
                                                                                      l2Tol1Amount,
-                                                                                     syncswapTimes,
-                                                                                     syncswapAmount,
-                                                                                     izumiTimes,
-                                                                                     izumiAmount,
-                                                                                     rubicTimes,
-                                                                                     rubicAmount,
-                                                                                     muteTimes,
-                                                                                     muteAmount
+                                                                                     contractsMap
                                                                                  }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -407,14 +367,14 @@ function Zksync() {
                         item.l1Tol2Amount = l1Tol2Amount;
                         item.l2Tol1Times = l2Tol1Times;
                         item.l2Tol1Amount = l2Tol1Amount;
-                        item.syncswapTimes = syncswapTimes;
-                        item.syncswapAmount = syncswapAmount;
-                        item.izumiTimes = izumiTimes;
-                        item.izumiAmount = izumiAmount;
-                        item.rubicTimes = rubicTimes;
-                        item.rubicAmount = rubicAmount;
-                        item.muteTimes = muteTimes;
-                        item.muteAmount = muteAmount;
+                        item.syncswapTimes = contractsMap.get("syncswap")?.times;
+                        item.syncswapAmount = contractsMap.get("syncswap")?.amount;
+                        item.izumiTimes = contractsMap.get("izumi")?.times;
+                        item.izumiAmount = contractsMap.get("izumi")?.amount;
+                        item.rubicTimes = contractsMap.get("rubic")?.times;
+                        item.rubicAmount = contractsMap.get("rubic")?.amount;
+                        item.muteTimes = contractsMap.get("mute")?.times;
+                        item.muteAmount = contractsMap.get("mute")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(data));
                     }))
@@ -513,14 +473,7 @@ function Zksync() {
                                                                                 l1Tol2Amount,
                                                                                 l2Tol1Times,
                                                                                 l2Tol1Amount,
-                                                                                syncswapTimes,
-                                                                                syncswapAmount,
-                                                                                izumiTimes,
-                                                                                izumiAmount,
-                                                                                rubicTimes,
-                                                                                rubicAmount,
-                                                                                muteTimes,
-                                                                                muteAmount
+                                                                                contractsMap
                                                                             }) => {
                         item.totalFee = totalFee;
                         item.contractActivity = contractActivity;
@@ -531,14 +484,14 @@ function Zksync() {
                         item.l1Tol2Amount = l1Tol2Amount;
                         item.l2Tol1Times = l2Tol1Times;
                         item.l2Tol1Amount = l2Tol1Amount;
-                        item.syncswapTimes = syncswapTimes;
-                        item.syncswapAmount = syncswapAmount;
-                        item.izumiTimes = izumiTimes;
-                        item.izumiAmount = izumiAmount;
-                        item.rubicTimes = rubicTimes;
-                        item.rubicAmount = rubicAmount;
-                        item.muteTimes = muteTimes;
-                        item.muteAmount = muteAmount;
+                        item.syncswapTimes = contractsMap.get("syncswap")?.times;
+                        item.syncswapAmount = contractsMap.get("syncswap")?.amount;
+                        item.izumiTimes = contractsMap.get("izumi")?.times;
+                        item.izumiAmount = contractsMap.get("izumi")?.amount;
+                        item.rubicTimes = contractsMap.get("rubic")?.times;
+                        item.rubicAmount = contractsMap.get("rubic")?.amount;
+                        item.muteTimes = contractsMap.get("mute")?.times;
+                        item.muteAmount = contractsMap.get("mute")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -621,14 +574,7 @@ function Zksync() {
                                                                                 l1Tol2Amount,
                                                                                 l2Tol1Times,
                                                                                 l2Tol1Amount,
-                                                                                syncswapTimes,
-                                                                                syncswapAmount,
-                                                                                izumiTimes,
-                                                                                izumiAmount,
-                                                                                rubicTimes,
-                                                                                rubicAmount,
-                                                                                muteTimes,
-                                                                                muteAmount
+                                                                                contractsMap
                                                                             }) => {
                         newEntry.totalFee = totalFee;
                         newEntry.contractActivity = contractActivity;
@@ -639,14 +585,14 @@ function Zksync() {
                         newEntry.l1Tol2Amount = l1Tol2Amount;
                         newEntry.l2Tol1Times = l2Tol1Times;
                         newEntry.l2Tol1Amount = l2Tol1Amount;
-                        newEntry.syncswapTimes = syncswapTimes;
-                        newEntry.syncswapAmount = syncswapAmount;
-                        newEntry.izumiTimes = izumiTimes;
-                        newEntry.izumiAmount = izumiAmount;
-                        newEntry.rubicTimes = rubicTimes;
-                        newEntry.rubicAmount = rubicAmount;
-                        newEntry.muteTimes = muteTimes;
-                        newEntry.muteAmount = muteAmount;
+                        newEntry.syncswapTimes = contractsMap.get("syncswap")?.times;
+                        newEntry.syncswapAmount = contractsMap.get("syncswap")?.amount;
+                        newEntry.izumiTimes = contractsMap.get("izumi")?.times;
+                        newEntry.izumiAmount = contractsMap.get("izumi")?.amount;
+                        newEntry.rubicTimes = contractsMap.get("rubic")?.times;
+                        newEntry.rubicAmount = contractsMap.get("rubic")?.amount;
+                        newEntry.muteTimes = contractsMap.get("mute")?.times;
+                        newEntry.muteAmount = contractsMap.get("mute")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
