@@ -2,9 +2,14 @@ import axios from "axios";
 import {ethers} from "ethers";
 
 const CONTRACR_SYNCSWAP = "0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295".toLowerCase();
-const CONTRACR_IZUMI = "0x9606eC131EeC0F84c95D82c9a63959F2331cF2aC".toLowerCase();
+const CONTRACR_IZUMI = "0x9606eC131EeC0F84c95D82c9a63959F2331cF2aC".toLowerCase(); // liquidity 0x936c9A1B8f88BFDbd5066ad08e5d773BC82EB15F
 const CONTRACR_RUBIC = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce".toLowerCase();
 const CONTRACR_MUTE = "0x8B791913eB07C32779a16750e3868aA8495F5964".toLowerCase();
+const CONTRACR_SPCACEFI = "0xbE7D1FD1f6748bbDefC4fbaCafBb11C6Fc506d1d".toLowerCase();
+
+const CONTRACR_MAV = "0x39E098A153Ad69834a9Dac32f0FCa92066aD03f4".toLowerCase();
+  
+
 
 function getDayNumber(d) {
     return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
@@ -66,20 +71,17 @@ async function processTransactions(
             if (list[i].data.contractAddress.toLowerCase() === contract.address.toLowerCase()) {
                 contract.times++;
                 const erc20TransfersList = list[i].erc20Transfers;
-                // console.log("syncswap erc20TransfersList:", erc20TransfersList);
                 for (let j = 0; j < erc20TransfersList.length; j++) {
                     if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
                         && erc20TransfersList[j].tokenInfo.symbol == "ETH"
                         && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
                         
-                        // console.log("syncswap amount ", erc20TransfersList[j].amount);
                         const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
                         contract.amount += parseFloat(value);
                     }else if ( erc20TransfersList[j].to.toLowerCase() === address.toLowerCase() 
                         && erc20TransfersList[j].tokenInfo.symbol == "ETH"
                         && erc20TransfersList[j].from.toLowerCase() != "0x0000000000000000000000000000000000008001") {
                         
-                        // console.log("syncswap amount ", erc20TransfersList[j].amount);
                         const value = ethers.formatEther(erc20TransfersList[j].amount, "ether");
                         contract.amount += parseFloat(value);
                     }
@@ -129,6 +131,16 @@ async function getZkSyncBridge(address) {
         });
         contractsMap.set("mute", {
             address: CONTRACR_MUTE,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("spacefi", {
+            address: CONTRACR_SPCACEFI,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("mav", {
+            address: CONTRACR_MAV,
             times: 0,
             amount: 0
         });

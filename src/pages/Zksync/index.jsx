@@ -152,7 +152,7 @@ function Zksync() {
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
                                                           l2Tol1Amount,
-                                                          contractList
+                                                          contractsMap
                                                       }) => {
                     updatedData[index] = {
                         ...updatedData[index],
@@ -165,7 +165,7 @@ function Zksync() {
                         l1Tol2Amount,
                         l2Tol1Times,
                         l2Tol1Amount,
-                        contractList
+                        contractsMap
                     };
                     setData(updatedData);
                     localStorage.setItem('addresses', JSON.stringify(data));
@@ -190,7 +190,7 @@ function Zksync() {
                     l1Tol2Amount: null,
                     l2Tol1Times: null,
                     l2Tol1Amount: null,
-                    contractList,
+                    contractsMap: null,
                     contractActivity: null,
                     totalFee: null,
                 };
@@ -237,7 +237,7 @@ function Zksync() {
                                                           l1Tol2Amount,
                                                           l2Tol1Times,
                                                           l2Tol1Amount,
-                                                          contractList
+                                                          contractsMap
                                                       }) => {
                     newEntry.totalFee = totalFee;
                     newEntry.contractActivity = contractActivity;
@@ -248,7 +248,7 @@ function Zksync() {
                     newEntry.l1Tol2Amount = l1Tol2Amount;
                     newEntry.l2Tol1Times = l2Tol1Times;
                     newEntry.l2Tol1Amount = l2Tol1Amount;
-                    newEntry.contractList = contractList;
+                    newEntry.contractsMap = contractsMap;
                     setData([...newData]);
                     localStorage.setItem('addresses', JSON.stringify(newData));
                 })
@@ -315,6 +315,10 @@ function Zksync() {
                     item.rubicAmount = null;
                     item.muteTimes = null;
                     item.muteAmount = null;
+                    item.spacefiTimes = null;
+                    item.spacefiAmount = null;
+                    item.mavTimes = null;
+                    item.mavAmount = null;
                     item.contractActivity = null;
                     item.totalFee = null;
                     setData([...newData]);
@@ -375,6 +379,10 @@ function Zksync() {
                         item.rubicAmount = contractsMap.get("rubic")?.amount;
                         item.muteTimes = contractsMap.get("mute")?.times;
                         item.muteAmount = contractsMap.get("mute")?.amount;
+                        item.spacefiTimes = contractsMap.get("spacefi")?.times;
+                        item.spacefiAmount = contractsMap.get("spacefi")?.amount;
+                        item.mavTimes = contractsMap.get("mav")?.times;
+                        item.mavAmount = contractsMap.get("mav")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(data));
                     }))
@@ -492,6 +500,10 @@ function Zksync() {
                         item.rubicAmount = contractsMap.get("rubic")?.amount;
                         item.muteTimes = contractsMap.get("mute")?.times;
                         item.muteAmount = contractsMap.get("mute")?.amount;
+                        item.spacefiTimes = contractsMap.get("spacefi")?.times;
+                        item.spacefiAmount = contractsMap.get("spacefi")?.amount;
+                        item.mavTimes = contractsMap.get("mav")?.times;
+                        item.mavAmount = contractsMap.get("mav")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -525,6 +537,10 @@ function Zksync() {
                         rubicAmount: null,
                         muteTimes: null,
                         muteAmount: null,
+                        spacefiTimes: null,
+                        spacefiAmount: null,
+                        mavTimes: null,
+                        mavAmount: null,
                         contractActivity: null,
                         totalFee: null,
                     };
@@ -593,6 +609,10 @@ function Zksync() {
                         newEntry.rubicAmount = contractsMap.get("rubic")?.amount;
                         newEntry.muteTimes = contractsMap.get("mute")?.times;
                         newEntry.muteAmount = contractsMap.get("mute")?.amount;
+                        newEntry.spacefiTimes = contractsMap.get("spacefi")?.times;
+                        newEntry.spacefiAmount = contractsMap.get("spacefi")?.amount;
+                        newEntry.mavTimes = contractsMap.get("mav")?.times;
+                        newEntry.mavAmount = contractsMap.get("mav")?.amount;
                         setData([...newData]);
                         localStorage.setItem('addresses', JSON.stringify(newData));
                     }));
@@ -931,6 +951,50 @@ function Zksync() {
                     ],
                 },
                 {
+                    title: "Spacefi合约",
+                    key: "contract_spacefi_group",
+                    children: [
+                        {
+                            title: "交互次数",
+                            dataIndex: "spacefiTimes",
+                            key: "spacefiTimes",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                        {
+                            title: "交互金额",
+                            dataIndex: "spacefiAmount",
+                            key: "spacefiAmount",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                    ],
+                },
+                {
+                    title: "Mav 合约",
+                    key: "contract_mav_group",
+                    children: [
+                        {
+                            title: "交互次数",
+                            dataIndex: "mavTimes",
+                            key: "mavTimes",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                        {
+                            title: "交互金额",
+                            dataIndex: "mavAmount",
+                            key: "mavAmount",
+                            align: "center",
+                            render: (text, record) => (text === null ? <Spin/> : text),
+                            // width: 75
+                        },
+                    ],
+                },
+                {
                     title: "活跃统计",
                     key: "activity_stats_group",
                     children: [
@@ -1118,6 +1182,8 @@ function Zksync() {
                             let totalIzumiAmount = 0;
                             let totalRubicAmount = 0;
                             let totalMuteAmount = 0;
+                            let totalSpacefiAmount = 0;
+                            let totalMavAmount = 0;
                             let totalFees = 0;
                             pageData.forEach(({
                                                   eth_balance,
@@ -1128,6 +1194,8 @@ function Zksync() {
                                                   izumiAmount,
                                                   rubicAmount,
                                                   muteAmount,
+                                                  spacefiAmount,
+                                                  mavAmount,
                                                   totalFee
                                               }) => {
                                 ethBalance += Number(eth_balance);
@@ -1138,6 +1206,8 @@ function Zksync() {
                                 totalIzumiAmount += Number(izumiAmount);
                                 totalRubicAmount += Number(rubicAmount);
                                 totalMuteAmount += Number(muteAmount);
+                                totalSpacefiAmount += Number(spacefiAmount);
+                                totalMavAmount += Number(mavAmount);
                                 totalFees += Number(totalFee);
                             })
 
@@ -1167,6 +1237,10 @@ function Zksync() {
                                         <Table.Summary.Cell index={19}>{totalRubicAmount.toFixed(3)}</Table.Summary.Cell>
                                         {emptyCells_1}
                                         <Table.Summary.Cell index={19}>{totalMuteAmount.toFixed(3)}</Table.Summary.Cell>
+                                        {emptyCells_1}
+                                        <Table.Summary.Cell index={19}>{totalSpacefiAmount.toFixed(3)}</Table.Summary.Cell>
+                                        {emptyCells_1}
+                                        <Table.Summary.Cell index={19}>{totalMavAmount.toFixed(3)}</Table.Summary.Cell>
                                         {emptyCells_4}
                                         <Table.Summary.Cell index={22}>{totalFees.toFixed(3)}</Table.Summary.Cell>
                                     </Table.Summary.Row>
