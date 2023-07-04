@@ -8,7 +8,9 @@ const CONTRACR_MUTE = "0x8B791913eB07C32779a16750e3868aA8495F5964".toLowerCase()
 const CONTRACR_SPCACEFI = "0xbE7D1FD1f6748bbDefC4fbaCafBb11C6Fc506d1d".toLowerCase();
 
 const CONTRACR_MAV = "0x39E098A153Ad69834a9Dac32f0FCa92066aD03f4".toLowerCase();
-  
+const CONTRACR_CARV = "0x089b353642E6f066bAD44A6a854Ef4e3bCb0dC9C".toLowerCase();
+const CONTRACR_ZKNS = "0xAE23B6E7f91DDeBD3B70d74d20583E3e674Bd94f".toLowerCase();
+
 
 
 function getDayNumber(d) {
@@ -144,6 +146,17 @@ async function getZkSyncBridge(address) {
             times: 0,
             amount: 0
         });
+        contractsMap.set("carv", {
+            address: CONTRACR_CARV,
+            times: 0,
+            amount: 0
+        });
+        contractsMap.set("zkns", {
+            address: CONTRACR_ZKNS,
+            times: 0,
+            amount: 0
+        });
+
 
         const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
         const initResponse = await axios.get(initUrl)
