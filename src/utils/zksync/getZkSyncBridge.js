@@ -45,7 +45,7 @@ async function processTransactions(
     contractsMap
 ) {
     for (let i = 0; i < list.length; i++) {
-        if (list[i]['balanceChanges'][0]['from'].toLowerCase() === address.toLowerCase()) {
+        if (list[i]['from'].toLowerCase() === address.toLowerCase()) {
             const receivedAt = new Date(Date.parse(list[i]['receivedAt']));
             const contractAddress = list[i].data.contractAddress;
             const fee = (parseInt(list[i].fee, 16) / 10 ** 18).toFixed(5)
@@ -57,23 +57,23 @@ async function processTransactions(
         }
         if (list[i].isL1Originated === true) {
             l1Tol2Times++;
-            const value = ethers.formatEther(list[i].data.value, "ether");
+            const value = ethers.formatEther(list[i]['value'], "ether");
             l1Tol2Amount += parseFloat(value);
         } else if (
-            list[i].data.contractAddress ===
-            "0x000000000000000000000000000000000000800a"
+            list[i]['to'] ===
+            "0x000000000000000000000000000000000000800A"
         ) {
             l2Tol1Times++;
-            const value = ethers.formatEther(list[i].data.value, "ether");
+            const value = ethers.formatEther(list[i]['value'], "ether");
             l2Tol1Amount += parseFloat(value);
         }
 
         // 遍历 contractsMap
         for (let [key, contract] of contractsMap) {
-            if (list[i].data.contractAddress.toLowerCase() === contract.address.toLowerCase()) {
+            if (list[i].to.toLowerCase() === contract.address.toLowerCase()) {
                 contract.times++;
                 const erc20TransfersList = list[i].erc20Transfers;
-                for (let j = 0; j < erc20TransfersList.length; j++) {
+                for (let j = 0; erc20TransfersList && j < erc20TransfersList.length; j++) {
                     if ( erc20TransfersList[j].from.toLowerCase() === address.toLowerCase() 
                         && erc20TransfersList[j].tokenInfo.symbol == "ETH"
                         && erc20TransfersList[j].to.toLowerCase() != "0x0000000000000000000000000000000000008001") {
@@ -157,9 +157,14 @@ async function getZkSyncBridge(address) {
             amount: 0
         });
 
-
-        const initUrl = "https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=" + address;
+        const baseUrl = "https://block-explorer-api.mainnet.zksync.io/transactions?pageSize=100&direction=older&address=";
+        //https://block-explorer-api.mainnet.zksync.io/address/0xe9dc673fD7CE60b9B349e692C2CF531BFBa067Bc
+        //https://block-explorer-api.mainnet.zksync.io/transactions?address=0xe9dc673fD7CE60b9B349e692C2CF531BFBa067Bc&pageSize=10&page=1&toDate=2023-07-05T02%3A29%3A20.190Z
+        const initUrl = baseUrl + address;
         const initResponse = await axios.get(initUrl)
+        console.log("initResponse:", initResponse);
+        console.log("initResponse items:", initResponse.data.items);
+        console.log("initResponse total:", initResponse.data.meta.totalItems);
         const initDataLength = initResponse.data.total;
         [totalFee, contract, days, weeks, months, l1Tol2Times, l1Tol2Amount, l2Tol1Times, l2Tol1Amount, contractsMap] =
             await processTransactions(
@@ -169,7 +174,7 @@ async function getZkSyncBridge(address) {
                 days,
                 weeks,
                 months,
-                initResponse.data.list,
+                initResponse.data.items,
                 l1Tol2Times,
                 l1Tol2Amount,
                 l2Tol1Times,
@@ -182,7 +187,7 @@ async function getZkSyncBridge(address) {
             fromBlockNumber = initResponse.data.list[0].blockNumber;
             fromTxIndex = initResponse.data.list[0].indexInBlock;
             while (true) {
-                let url = `https://zksync2-mainnet-explorer.zksync.io/transactions?limit=100&direction=older&accountAddress=${address}`;
+                let url = baseUrl + `${address}`;
                 if (fromBlockNumber !== undefined && fromTxIndex !== undefined && offset !== 0) {
                     url += `&fromBlockNumber=${fromBlockNumber}&fromTxIndex=${fromTxIndex}&offset=${offset}`;
                 }
