@@ -77,7 +77,10 @@ function ZksyncTasks() {
     const openoceanContract = "0x36A1aCbbCAfca2468b85011DDD16E7Cb4d673230";
     const ezkContract = "0x498f7bB59c61307De7dEA005877220e4406470e9";
     const odosContract = "0xA269031037B4D5fa3F771c401D19E57def6Cb491";
-
+    const rubicContract = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce";
+    const zknsContract = "0xAE23B6E7f91DDeBD3B70d74d20583E3e674Bd94f";
+    const carvContract = "0x089b353642E6f066bAD44A6a854Ef4e3bCb0dC9C";
+    
     const toggleHideColumn = () => {
         setHideColumn(!hideColumn);
       };
@@ -212,6 +215,27 @@ function ZksyncTasks() {
                     return new Promise((resolve) => {
                         const result = checkTaskStatus(item.address, odosContract);
                         item.odos = result;
+                        resolve();
+                    });
+                });
+                promisesQueue.push(() => {
+                    return new Promise((resolve) => {
+                        const result = checkTaskStatus(item.address, carvContract);
+                        item.carv = result;
+                        resolve();
+                    });
+                });
+                promisesQueue.push(() => {
+                    return new Promise((resolve) => {
+                        const result = checkTaskStatus(item.address, rubicContract);
+                        item.rubic = result;
+                        resolve();
+                    });
+                });
+                promisesQueue.push(() => {
+                    return new Promise((resolve) => {
+                        const result = checkTaskStatus(item.address, zknsContract);
+                        item.zkns = result;
                         resolve();
                     });
                 });
@@ -375,6 +399,34 @@ function ZksyncTasks() {
                         return new Promise((resolve) => {
                             const result = checkTaskStatusByArray(contractAddresses, odosContract);
                             item.odos = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatusByArray(contractAddresses, carvContract);
+                            item.carv = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatus(item.address, carvContract);
+                            item.carv = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatus(item.address, rubicContract);
+                            item.rubic = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatus(item.address, zknsContract);
+                            item.zkns = result;
                             resolve();
                         });
                     });
@@ -908,6 +960,63 @@ function ZksyncTasks() {
                     width: 55
                 },
                 {
+                    title: <a href="https://app.rubic.exchange/" target="_blank" rel="noopener noreferrer">rubic</a>,
+                    dataIndex: "rubic",
+                    key: "rubic",
+                    align: "center",
+                    filters: [
+                        {
+                          text: '未完成',
+                          value: 0,
+                        }
+                    ],
+                    onFilter: (value, record) => record.rubic === value,
+                    render: (text, record) => (
+                        <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
+                            {text === null ? <Spin /> : text}
+                        </span>
+                    ),
+                    width: 55
+                },
+                {
+                    title: <a href="https://app.zkns.domains/" target="_blank" rel="noopener noreferrer">zkns</a>,
+                    dataIndex: "zkns",
+                    key: "zkns",
+                    align: "center",
+                    filters: [
+                        {
+                          text: '未完成',
+                          value: 0,
+                        }
+                    ],
+                    onFilter: (value, record) => record.zkns === value,
+                    render: (text, record) => (
+                        <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
+                            {text === null ? <Spin /> : text}
+                        </span>
+                    ),
+                    width: 55
+                },
+                {
+                    title: <a href="https://carv.io/carvpass" target="_blank" rel="noopener noreferrer">carv</a>,
+                    dataIndex: "carv",
+                    key: "carv",
+                    align: "center",
+                    filters: [
+                        {
+                          text: '未完成',
+                          value: 0,
+                        }
+                    ],
+                    onFilter: (value, record) => record.carv === value,
+                    render: (text, record) => (
+                        <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
+                            {text === null ? <Spin /> : text}
+                        </span>
+                    ),
+                    width: 55
+                },
+                {
                     title: '进度',
                     dataIndex: 'progress',
                     key: 'progress',
@@ -915,7 +1024,7 @@ function ZksyncTasks() {
                     sorter: (a, b) => a.progress - b.progress,
                     render: (text, record) => {
                       const items = ['sync', 'mute', 'okx', 'spacefi', '_1inch', 'izumi', 'zns',
-                       'velo', 'rf', 'eralend', 'mav', 'veSync', 'usdp', 'ooe', 'ezk', 'odos'];
+                       'velo', 'rf', 'eralend', 'mav', 'veSync', 'usdp', 'ooe', 'ezk', 'odos','rubic', 'carv'];
                       const count = items.reduce((total, item) => {
                         if (record[item] > 0) {
                           return total + 1;
