@@ -3,7 +3,24 @@ import {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import {GithubOutlined, TwitterOutlined} from "@ant-design/icons";
 import './index.css'
-import {getEthPrice} from "@utils";
+import {getEthPrice, getGasPrice} from "@utils";
+
+const GasPrice = () => {
+    const [gasPrice, setGasPrice] = useState(null);
+    useEffect(() => {
+        const fetchPrice = async () => {
+            const price = await getGasPrice();
+            setGasPrice(price);
+        };
+        fetchPrice();
+        const interval = setInterval(fetchPrice, 10000);
+        return () => clearInterval(interval);
+    }, []);
+    if (gasPrice === null) {
+        return <div>Loading ETH Price...</div>;
+    }
+    return <div>ETH Price: ${gasPrice}</div>
+}
 
 const EthPrice = () => {
     const [ethPrice, setEthPrice] = useState(null);
@@ -68,6 +85,10 @@ const MenuHeader = () => {
         {
             label: <EthPrice/>,
             key: 'ethPrice',
+        },
+        {
+            label: <GasPrice/>,
+            key: 'gasPrice',
         }
     ];
     const navigate = useNavigate();
