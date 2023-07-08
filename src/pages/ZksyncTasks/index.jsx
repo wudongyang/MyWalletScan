@@ -80,6 +80,7 @@ function ZksyncTasks() {
     const rubicContract = "0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce";
     const zknsContract = "0xAE23B6E7f91DDeBD3B70d74d20583E3e674Bd94f";
     const carvContract = "0x089b353642E6f066bAD44A6a854Ef4e3bCb0dC9C";
+    const karatContract = "0x112e5059a4742ad8b2baf9c453fda8695c200454";
     
     const toggleHideColumn = () => {
         setHideColumn(!hideColumn);
@@ -236,6 +237,13 @@ function ZksyncTasks() {
                     return new Promise((resolve) => {
                         const result = checkTaskStatus(item.address, zknsContract);
                         item.zkns = result;
+                        resolve();
+                    });
+                });
+                promisesQueue.push(() => {
+                    return new Promise((resolve) => {
+                        const result = checkTaskStatus(item.address, karatContract);
+                        item.karat = result;
                         resolve();
                     });
                 });
@@ -427,6 +435,13 @@ function ZksyncTasks() {
                         return new Promise((resolve) => {
                             const result = checkTaskStatus(item.address, zknsContract);
                             item.zkns = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatus(item.address, karatContract);
+                            item.karat = result;
                             resolve();
                         });
                     });
@@ -1009,6 +1024,25 @@ function ZksyncTasks() {
                         }
                     ],
                     onFilter: (value, record) => record.carv === value,
+                    render: (text, record) => (
+                        <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
+                            {text === null ? <Spin /> : text}
+                        </span>
+                    ),
+                    width: 55
+                },
+                {
+                    title: <a href="https://karatdao.com/" target="_blank" rel="noopener noreferrer">karat</a>,
+                    dataIndex: "karat",
+                    key: "karat",
+                    align: "center",
+                    filters: [
+                        {
+                          text: '未完成',
+                          value: 0,
+                        }
+                    ],
+                    onFilter: (value, record) => record.karat === value,
                     render: (text, record) => (
                         <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
                             {text === null ? <Spin /> : text}
