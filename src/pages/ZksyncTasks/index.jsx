@@ -81,7 +81,8 @@ function ZksyncTasks() {
     const zknsContract = "0xAE23B6E7f91DDeBD3B70d74d20583E3e674Bd94f";
     const carvContract = "0x089b353642E6f066bAD44A6a854Ef4e3bCb0dC9C";
     const karatContract = "0x112e5059a4742ad8b2baf9c453fda8695c200454";
-    
+    const petaContract = "0x58DE0595D262533B564B2b8961C104042e390922";
+
     const toggleHideColumn = () => {
         setHideColumn(!hideColumn);
       };
@@ -244,6 +245,13 @@ function ZksyncTasks() {
                     return new Promise((resolve) => {
                         const result = checkTaskStatus(item.address, karatContract);
                         item.karat = result;
+                        resolve();
+                    });
+                });
+                promisesQueue.push(() => {
+                    return new Promise((resolve) => {
+                        const result = checkTaskStatus(item.address, petaContract);
+                        item.peta = result;
                         resolve();
                     });
                 });
@@ -419,29 +427,30 @@ function ZksyncTasks() {
                     });
                     promisesQueue.push(() => {
                         return new Promise((resolve) => {
-                            const result = checkTaskStatus(item.address, carvContract);
-                            item.carv = result;
-                            resolve();
-                        });
-                    });
-                    promisesQueue.push(() => {
-                        return new Promise((resolve) => {
-                            const result = checkTaskStatus(item.address, rubicContract);
+                            const result = checkTaskStatusByArray(contractAddresses, rubicContract);
                             item.rubic = result;
                             resolve();
                         });
                     });
+                    
                     promisesQueue.push(() => {
                         return new Promise((resolve) => {
-                            const result = checkTaskStatus(item.address, zknsContract);
+                            const result = checkTaskStatusByArray(contractAddresses, zknsContract);
                             item.zkns = result;
                             resolve();
                         });
                     });
                     promisesQueue.push(() => {
                         return new Promise((resolve) => {
-                            const result = checkTaskStatus(item.address, karatContract);
+                            const result = checkTaskStatusByArray(contractAddresses, karatContract);
                             item.karat = result;
+                            resolve();
+                        });
+                    });
+                    promisesQueue.push(() => {
+                        return new Promise((resolve) => {
+                            const result = checkTaskStatusByArray(contractAddresses, petaContract);
+                            item.peta = result;
                             resolve();
                         });
                     });
@@ -1043,6 +1052,25 @@ function ZksyncTasks() {
                         }
                     ],
                     onFilter: (value, record) => record.karat === value,
+                    render: (text, record) => (
+                        <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
+                            {text === null ? <Spin /> : text}
+                        </span>
+                    ),
+                    width: 55
+                },
+                {
+                    title: <a href="https://petaverse.space?code=qQk9MZxEe63K0&chainId=324" target="_blank" rel="noopener noreferrer">peta</a>,
+                    dataIndex: "peta",
+                    key: "peta",
+                    align: "center",
+                    filters: [
+                        {
+                          text: '未完成',
+                          value: 0,
+                        }
+                    ],
+                    onFilter: (value, record) => record.peta === value,
                     render: (text, record) => (
                         <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
                             {text === null ? <Spin /> : text}
