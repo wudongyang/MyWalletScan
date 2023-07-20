@@ -74,6 +74,7 @@ function ZksyncTasks() {
     const mavContract = "0x39e098a153ad69834a9dac32f0fca92066ad03f4";
     const veSyncContract = "0x6C31035D62541ceba2Ac587ea09891d1645D6D07";
     const overNightContract = "0x84d05333f1F5Bf1358c3f63A113B1953C427925D";
+    const overNightContract2 = "0xA269031037B4D5fa3F771c401D19E57def6Cb491";
     const openoceanContract = "0x36A1aCbbCAfca2468b85011DDD16E7Cb4d673230";
     const ezkContract = "0x498f7bB59c61307De7dEA005877220e4406470e9";
     const odosContract = "0xA269031037B4D5fa3F771c401D19E57def6Cb491";
@@ -195,7 +196,7 @@ function ZksyncTasks() {
                 });
                 promisesQueue.push(() => {
                     return new Promise((resolve) => {
-                        const result = checkTaskStatus(item.address, overNightContract);
+                        const result = checkTaskStatus(item.address, overNightContract) + checkTaskStatus(item.address, overNightContract2);
                         item.usdp = result;
                         resolve();
                     });
@@ -400,7 +401,7 @@ function ZksyncTasks() {
                     });
                     promisesQueue.push(() => {
                         return new Promise((resolve) => {
-                            const result = checkTaskStatusByArray(contractAddresses, overNightContract);
+                            const result = checkTaskStatusByArray(contractAddresses, overNightContract) + checkTaskStatusByArray(contractAddresses, overNightContract2);
                             item.usdp = result;
                             resolve();
                         });
@@ -618,13 +619,17 @@ function ZksyncTasks() {
                     />
                 ) : (
                     <>
-                        <Tag color="blue">{text}</Tag>
-                        <Button
-                            shape="circle"
-                            icon={<EditOutlined/>}
-                            size={"small"}
-                            onClick={() => setEditingKey(record.key)}
-                        />
+                        <Tag color="blue" onClick={() => setEditingKey(record.key)}>
+                            {text}
+                            </Tag>
+                            {!text && (
+                            <Button
+                                shape="circle"
+                                icon={<EditOutlined />}
+                                size="small"
+                                onClick={() => setEditingKey(record.key)}
+                            />
+                        )}
                     </>
                 );
             },
@@ -678,7 +683,8 @@ function ZksyncTasks() {
             width: 55
         },
         {
-            title: <a href="https://defillama.com/chain/zkSync Era" style={{ color: 'white' }} target="_blank" rel="noopener noreferrer">zkSyncEra Task List  [参考defillama TVL数据]</a>,
+            title: <a href="https://defillama.com/chain/zkSync Era" style={{ color: 'white' }} 
+                target="_blank" rel="noopener noreferrer">zkSyncEra Task List  [参考defillama TVL数据]</a>,
             key: "zks_era_group",
             className: "zks_era",
             children: [
@@ -971,7 +977,7 @@ function ZksyncTasks() {
                           value: 0,
                         }
                     ],
-                    onFilter: (value, record) => record.ooe === value,
+                    onFilter: (value, record) => record.ezk === value,
                     render: (text, record) => (
                         <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
                             {text === null ? <Spin /> : text}
@@ -990,7 +996,7 @@ function ZksyncTasks() {
                           value: 0,
                         }
                     ],
-                    onFilter: (value, record) => record.ooe === value,
+                    onFilter: (value, record) => record.odos === value,
                     render: (text, record) => (
                         <span style={{ color: text === 0 ? 'red' : 'inherit' }}>
                             {text === null ? <Spin /> : text}

@@ -25,6 +25,7 @@ import {
 import {useEffect, useState} from "react";
 import './index.css';
 import {Layout, Card} from 'antd';
+import { ethers } from 'ethers';
 
 const {Content} = Layout;
 import {
@@ -61,6 +62,41 @@ function Zksync() {
         setHideColumn(!hideColumn);
       };
     
+    const getNftBalance = async (address) => {
+        try {
+        const provider = new ethers.JsonRpcProvider('https://mainnet.era.zksync.io');
+        const ABI = [
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+              ],
+              name: "balanceOf",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+          ];
+          const contractAddress = "0xd07180c423f9b8cf84012aa28cc174f3c433ee29";
+          const contract = new ethers.Contract(contractAddress, ABI, provider);
+          const result = await contract.balanceOf(address);
+          return {zks_nft: result.toString()};
+        } 
+        catch (error) {
+            console.log(error);
+            return {zks_nft: "Error"};
+        }
+    }
+
     const getEyeIcon = () => {
     if (hideColumn) {
         return <EyeInvisibleOutlined />;
@@ -130,12 +166,13 @@ function Zksync() {
                     return item;
                 }));
                 const updatedData = [...data];
-                getZksEra(values.address).then(({balance2, tx2, usdcBalance}) => {
+                getZksEra(values.address).then(({balance2, tx2, usdcBalance, eraETH}) => {
                     updatedData[index] = {
                         ...updatedData[index],
                         zks2_balance: balance2,
                         zks2_tx_amount: tx2,
                         zks2_usdcBalance: usdcBalance,
+                        zks_eraETH: eraETH,
                     };
                     setData(updatedData);
                     localStorage.setItem('addresses', JSON.stringify(data));
@@ -207,6 +244,7 @@ function Zksync() {
                     zks2_balance: null,
                     zks2_tx_amount: null,
                     zks2_usdcBalance: null,
+                    zks_eraETH: null,
                     zks2_last_tx: null,
                     zks1_balance: null,
                     zks1_tx_amount: null,
@@ -223,10 +261,11 @@ function Zksync() {
                 };
                 const newData = [...data, newEntry];
                 setData(newData);
-                getZksEra(values.address).then(({balance2, tx2, usdcBalance}) => {
+                getZksEra(values.address).then(({balance2, tx2, usdcBalance, eraETH}) => {
                     newEntry.zks2_balance = balance2;
                     newEntry.zks2_tx_amount = tx2;
                     newEntry.zks2_usdcBalance = usdcBalance;
+                    newEntry.zks_eraETH = eraETH;
                     setData([...newData]);
                     localStorage.setItem('addresses', JSON.stringify(newData));
                 })
@@ -326,14 +365,24 @@ function Zksync() {
                         item.zks2_balance = null;
                         item.zks2_tx_amount = null;
                         item.zks2_usdcBalance = null;
-                        return getZksEra(item.address).then(({balance2, tx2, usdcBalance}) => {
+                        item.zks_eraETH = null;
+                        return getZksEra(item.address).then(({balance2, tx2, usdcBalance, eraETH}) => {
                             item.zks2_balance = balance2;
                             item.zks2_tx_amount = tx2;
                             item.zks2_usdcBalance = usdcBalance;
+                            item.zks_eraETH = eraETH;
                             setData([...newData]);
                             localStorage.setItem('addresses', JSON.stringify(newData));
                         })
                     });
+                    promisesQueue.push(async () => {
+                        item.zks_nft = null;
+                        return getNftBalance(item.address).then(({zks_nft}) => {
+                            item.zks_nft = zks_nft;
+                            setData([...newData]);
+                            localStorage.setItem('addresses', JSON.stringify(newData));
+                        })
+                    })
                     promisesQueue.push(() => {
                         item.zks1_balance = null;
                         item.zks1_tx_amount = null;
@@ -474,6 +523,7 @@ function Zksync() {
                     zks2_balance: null,
                     zks2_tx_amount: null,
                     zks2_usdcBalance: null,
+                    zks_eraETH: null,
                     zks1_balance: null,
                     zks1_tx_amount: null,
                     zks2_last_tx: null,
@@ -491,10 +541,11 @@ function Zksync() {
                 if (index === -1) {
                     newData.push(item);
                 }
-                promisesQueue.push(() => getZksEra(address).then(({balance2, tx2, usdcBalance}) => {
+                promisesQueue.push(() => getZksEra(address).then(({balance2, tx2, usdcBalance, eraETH}) => {
                     item.zks2_balance = balance2;
                     item.zks2_tx_amount = tx2;
                     item.zks2_usdcBalance = usdcBalance;
+                    item.zks_eraETH = eraETH;
                 }));
 
 
@@ -655,13 +706,17 @@ function Zksync() {
                     />
                 ) : (
                     <>
-                        <Tag color="blue">{text}</Tag>
-                        <Button
-                            shape="circle"
-                            icon={<EditOutlined/>}
-                            size={"small"}
-                            onClick={() => setEditingKey(record.key)}
-                        />
+                        <Tag color="blue" onClick={() => setEditingKey(record.key)}>
+                            {text}
+                            </Tag>
+                            {!text && (
+                            <Button
+                                shape="circle"
+                                icon={<EditOutlined />}
+                                size="small"
+                                onClick={() => setEditingKey(record.key)}
+                            />
+                        )}
                     </>
                 );
             },
@@ -769,6 +824,14 @@ function Zksync() {
                     title: "USDC",
                     dataIndex: "zks2_usdcBalance",
                     key: "zks2_usdcBalance",
+                    align: "center",
+                    render: (text, record) => (text === null ? <Spin/> : text),
+                    width: 60
+                },
+                {
+                    title: "eraETH",
+                    dataIndex: "zks_eraETH",
+                    key: "zks_eraETH",
                     align: "center",
                     render: (text, record) => (text === null ? <Spin/> : text),
                     width: 60
@@ -1154,22 +1217,52 @@ function Zksync() {
                             let zks1Balance = 0;
                             let zks2Balance = 0;
                             let zks2UsdcBalance = 0;
+                            let zksEraETH = 0;
                             let totalFees = 0;
+                            let avgTx = 0;
+                            let avgDay = 0;
+                            let avgWeek = 0;
+                            let avgMonth = 0;
+                            let avgContract = 0;
+                            let avgAmount = 0;
+                            let avgScore = 0;
                             pageData.forEach(({
-                                                  eth_balance,
-                                                  zks1_balance,
-                                                  zks2_balance,
-                                                  zks2_usdcBalance,
-                                                  totalFee
-                                              }) => {
+                                eth_balance,
+                                zks1_balance,
+                                zks2_balance,
+                                zks2_usdcBalance,
+                                zks_eraETH,
+                                zks2_tx_amount,
+                                totalFee,
+                                dayActivity,
+                                weekActivity,
+                                monthActivity,
+                                contractActivity,
+                                totalExchangeAmount,
+                                zk_score
+                            }) => {
                                 ethBalance += Number(eth_balance);
                                 zks1Balance += Number(zks1_balance);
                                 zks2Balance += Number(zks2_balance);
                                 zks2UsdcBalance += Number(zks2_usdcBalance);
+                                zksEraETH += Number(zks_eraETH);
                                 totalFees += Number(totalFee);
+                                avgTx += Number(zks2_tx_amount);
+                                avgDay += Number(dayActivity);
+                                avgWeek += Number(weekActivity);
+                                avgMonth += Number(monthActivity);
+                                avgContract += Number(contractActivity);
+                                avgAmount += Number(totalExchangeAmount);
+                                avgScore += Number(zk_score);
                             })
-
-                            const emptyCells = Array(10).fill().map((_, index) => <Table.Summary.Cell key={index} index={index + 10}/>);
+                            avgTx = avgTx / pageData.length;
+                            avgDay = avgDay / pageData.length;
+                            avgWeek = avgWeek / pageData.length;
+                            avgMonth = avgMonth / pageData.length;
+                            avgContract = avgContract / pageData.length;
+                            avgAmount = avgAmount / pageData.length;
+                            avgScore = avgScore / pageData.length;
+                            const emptyCells = Array(5).fill().map((_, index) => <Table.Summary.Cell key={index} index={index + 11}/>);
 
                             return (
                                 <>
@@ -1180,13 +1273,18 @@ function Zksync() {
                                         <Table.Summary.Cell index={6}>{zks1Balance.toFixed(4)}</Table.Summary.Cell>
                                         <Table.Summary.Cell index={7}/>
                                         <Table.Summary.Cell index={8}>{zks2Balance.toFixed(4)}</Table.Summary.Cell>
-                                        <Table.Summary.Cell
-                                            index={9}>{zks2UsdcBalance.toFixed(2)}</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={9}>{zks2UsdcBalance.toFixed(2)}</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={10}>{zksEraETH.toFixed(4)}</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={11}>-{avgTx.toFixed(0)}-</Table.Summary.Cell>
                                         {emptyCells}
-                                        <Table.Summary.Cell index={19}/>
-                                        <Table.Summary.Cell index={20}>{totalFees.toFixed(4)}</Table.Summary.Cell>
-                                        <Table.Summary.Cell index={21}/>
-                                        <Table.Summary.Cell index={22}/>
+                                        <Table.Summary.Cell index={17}>-{avgDay.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={18}>-{avgWeek.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={19}>-{avgMonth.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={20}>-{avgContract.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={21}>-{avgAmount.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={22}>{totalFees.toFixed(4)}</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={23}>-{avgScore.toFixed(0)}-</Table.Summary.Cell>
+                                        <Table.Summary.Cell index={24}/>
                                     </Table.Summary.Row>
                                 </>
                             )
